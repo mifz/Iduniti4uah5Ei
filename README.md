@@ -46,6 +46,8 @@
 
 После первой установки необходимо в inventory поменять флаг `postgresql_exists` в true у `хостов` в группах `[master]` и `[replica]`, чтобы не получить ошибку при перенакатке роли.
 
+Адрес со статистикой HAProxy: [Statistics Report for HAProxy](http://haproxy:7000/stats)
+
 
 # Helm
 ---
