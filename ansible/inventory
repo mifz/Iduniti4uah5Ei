@@ -61,7 +61,7 @@ ansible_connection='ssh'
 ansible_ssh_port='22'
 ansible_user='mifz'
 #ansible_ssh_pass='secretpassword'  # "sshpass" package is required for use "ansible_ssh_pass"
-ansible_ssh_private_key_file=../../mts
+ansible_ssh_private_key_file=./configs/ssh-mts
 #ansible_python_interpreter='/usr/bin/python3'  # is required for use python3
 
 [pgbackrest:vars]
