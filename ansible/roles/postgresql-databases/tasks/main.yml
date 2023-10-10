@@ -20,5 +20,5 @@
   loop: "{{ postgresql_databases | flatten(1) }}"
   when: postgresql_databases is defined and postgresql_databases | length > 0
   tags: postgresql_databases  
-  
+
 ...

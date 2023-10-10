@@ -5,12 +5,12 @@
 
 Список VM:
 
-- haproxy - HAProxy
-- pg-01 - PostgreSQL + Patroni
-- pg-02 - PostgreSQL + Patroni
-- etcd-01 - etcd
-- etcd-02 - etcd
-- etcd-03 - etcd
+- haproxy - HAProxy;
+- pg-01 - PostgreSQL + Patroni;
+- pg-02 - PostgreSQL + Patroni;
+- etcd-01 - etcd;
+- etcd-02 - etcd;
+- etcd-03 - etcd.
 
 Для каждой VM создан снапшот, чтобы можно было тратить меньше времени на ее пересоздание в случае необходимости.
 
@@ -22,10 +22,10 @@
 
 Разрешены все протоколы и порты для:
 
-- Home
-- Kubernetes
-- Внутренняя сеть
-- Внешние адреса VM
+- Home;
+- Kubernetes;
+- Внутренняя сеть;
+- Внешние адреса VM.
 
 У всех VM есть внешний адрес, но так как судя по всему используется NAT 1:1, то Firewall виртуальной сети функционирует и тут.
 
@@ -41,8 +41,8 @@
 
 В роль добавлены:
 
-- Добавление адреса HAProxy через переменную cluster_ip в pg_hba.conf
-- Создание БД в процессе установки и загрузка в нее SQL-дампа: roles/postgresql-databases/
+- Добавление адреса HAProxy через переменную cluster_ip в pg_hba.conf;
+- Создание БД в процессе установки и загрузка в нее SQL-дампа: roles/postgresql-databases/ с нужными базами, таблицами, 10 городами и рандомно генерируемыми данными по температуре.
 
 После первой установки необходимо в inventory поменять флаг `postgresql_exists` в true у `хостов` в группах `[master]` и `[replica]`, чтобы не получить ошибку при перенакатке роли.
 
