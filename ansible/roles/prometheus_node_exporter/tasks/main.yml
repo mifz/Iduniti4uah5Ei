@@ -1,0 +1,80 @@
+---
+
+- name: Prometheus Node Exporter {{ ':' }} Check for exist
+  ansible.builtin.stat:
+    path: "{{ prometheus_node_exporter_bin }}"
+  register: r_prometheus_node_exporter_exist
+
+- name: Prometheus Node Exporter {{ ':' }} Create user
+  ansible.builtin.user:
+    name: "{{ prometheus_node_exporter_user }}"
+    append: true
+    shell: /usr/sbin/nologin
+    group: "{{ prometheus_node_exporter_group }}"
+    groups: ""
+    system: true
+    create_home: false
+
+- name: Prometheus Node Exporter {{ ':' }} Create config dir
+  ansible.builtin.file:
+    path: "{{ prometheus_node_exporter_dir_conf }}"
+    state: directory
+    owner: "{{ prometheus_node_exporter_user }}"
+    group: "{{ prometheus_node_exporter_group }}"    
+
+
+- name: Prometheus Node Exporter {{ ':' }} Check for version if exist
+  ansible.builtin.shell: "cat /etc/systemd/system/prometheus_node_exporter.service | grep Version | sed s/'.*Version '//g"
+  when: r_prometheus_node_exporter_exist.stat.exists == true
+  changed_when: false
+  register: r_prometheus_node_exporter_version
+
+- block:
+
+    - name: Prometheus Node Exporter {{ ':' }} Download and unarchive
+      ansible.builtin.unarchive:
+        src: "https://github.com/prometheus/node_exporter/releases/download/v{{ prometheus_node_exporter_version }}/node_exporter-{{ prometheus_node_exporter_version }}.linux-amd64.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+        validate_certs: no
+
+    - name: Prometheus Node Exporter {{ ':' }} Move binary to bin path
+      ansible.builtin.copy:
+        src: "/tmp/node_exporter-{{ prometheus_node_exporter_version }}.linux-amd64/node_exporter"
+        dest: "{{ prometheus_node_exporter_bin }}"
+        owner: "{{ prometheus_node_exporter_user }}"
+        group: "{{ prometheus_node_exporter_group }}"
+        mode: 0755
+        remote_src: yes
+
+    - name: Prometheus Node Exporter {{ ':' }} Delete temp
+      ansible.builtin.file:
+        path: /tmp/node_exporter-{{ prometheus_node_exporter_version }}.linux-amd64/
+        state: absent        
+  when: r_prometheus_node_exporter_exist.stat.exists == false or not r_prometheus_node_exporter_version.stdout == prometheus_node_exporter_version
+
+- name: Prometheus Node Exporter {{ ':' }} Install web-config
+  ansible.builtin.copy:
+    src: web-config.yml
+    dest: "{{ prometheus_node_exporter_dir_conf }}/web-config.yml"
+    owner: "{{ prometheus_node_exporter_user }}"
+    group: "{{ prometheus_node_exporter_group }}"
+    mode: 0755
+  notify: "Reload systemd daemon and restart prometheus_node_exporter service"
+
+- name: Prometheus Node Exporter {{ ':' }} Install systemd service
+  ansible.builtin.template:
+    src: prometheus_node_exporter.service.j2
+    dest: /etc/systemd/system/prometheus_node_exporter.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: "Reload systemd daemon and restart prometheus_node_exporter service"
+
+- meta: flush_handlers
+
+- name: Prometheus Node Exporter {{ ':' }} Enabled systemd service
+  ansible.builtin.systemd_service:
+    name: prometheus_node_exporter
+    state: started
+    enabled: yes

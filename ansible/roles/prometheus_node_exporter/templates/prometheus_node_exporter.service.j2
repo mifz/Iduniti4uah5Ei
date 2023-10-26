@@ -1,0 +1,10 @@
+[Unit]
+Description=Prometheus Node Exporter Version {{ prometheus_node_exporter_version }}
+After=network-online.target
+[Service]
+User={{ prometheus_node_exporter_user }}
+Group={{ prometheus_node_exporter_user }}
+Type=simple
+ExecStart={{ prometheus_node_exporter_bin }} --web.config.file={{ prometheus_node_exporter_dir_conf }}/web-config.yml --collector.systemd --collector.processes
+[Install]
+WantedBy=multi-user.target

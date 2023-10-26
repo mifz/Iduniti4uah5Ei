@@ -1,0 +1,6 @@
+- name: Reload systemd daemon and restart prometheus_node_exporter service
+  systemd:
+    name: prometheus_node_exporter
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

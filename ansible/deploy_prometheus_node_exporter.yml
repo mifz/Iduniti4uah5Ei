@@ -1,0 +1,12 @@
+---
+
+- name: Deploy Prometheus Node Exporter
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  any_errors_fatal: true
+  vars_files:
+    - vars/system.yml
+  roles:
+    - role: prometheus_node_exporter

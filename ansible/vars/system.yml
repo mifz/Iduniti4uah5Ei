@@ -209,4 +209,11 @@ cron_jobs: []
 #    weekday: "*"
 #    job: "echo 'example job two command'"
 
+# Prometheus Node Exporter
+prometheus_node_exporter_bin: /usr/local/bin/node_exporter
+prometheus_node_exporter_user: node-exporter
+prometheus_node_exporter_group: "{{ prometheus_node_exporter_user }}"
+prometheus_node_exporter_dir_conf: /etc/prometheus_node_exporter
+prometheus_node_exporter_version: 1.6.1
+
 ...
