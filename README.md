@@ -34,7 +34,7 @@
 Внешние адреса используется для того, чтобы попадать на хосты по SSH для возможной отладки и в случае HAProxy, чтобы открыть доступ Kubernetes.
 
 
-# PostgreSQL
+# PostgreSQL / Patroni / etcd / HAProxy
 ---
 
 
@@ -67,22 +67,51 @@
 Итоговое приложение находится по адресу:  http://iduniti4uah5ei.local/
 
 
-# Prometheus
+# Prometheus / Exporters / Grafana
 - - -
 
 Prometheus установлен вручную на отдельной виртуальной машине.
 
 Установлена авторизация по логину/паролю и добавлен самоподписанный сертификат.
 
+Включен `enable-admin-api` для доступ к API для управления данными через `curl`
+
+Storage retention выставлен в 90 дней.
+
 Метрики:
 
 - Prometheus;
 - node_exporter;
-  - Хосты разделены по группам при помощи меток
+  - Хосты разделены по группам при помощи меток;
+- patroni_exporter;
+  - Добавлена метка service_name для отображения селектора и имени в дашборде;
+- etcd_exporter;
+- postgresql_exporter;
+- blackbox_exporter (сам blackbox и его метрики);
+- alertmanager (сам alertmanager и его метрики).
+
+Используемые шаблоны Grafana:
+
+- [Node Exporter Full  | Grafana Labs](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)
+  - Внесены изменения для корректного отображения групп хостов;
+  - На экспортерах включены коллекторы `systemd` и `processes` для корректной работы дашборда;
+- [PostgreSQL Patroni | Grafana Labs](https://grafana.com/grafana/dashboards/18870-postgresql-patroni/)
+- [Etcd by Prometheus | Grafana Labs](https://grafana.com/grafana/dashboards/3070-etcd/)
+  - Немного странный шаблон, либо же я не разобрался, так как сразу в глаза бросилась странная метрика `The total number of failed proposals seen`, которая показывала `1`. Оказалось, что она смотрит на counter `etcd_server_leader_changes_seen_total`. Поменял на `etcd_server_proposals_failed_total`.
+- [PostgreSQL Database | Grafana Labs](https://grafana.com/grafana/dashboards/9628-postgresql-database/)
+  - datasource ограничен одним источником;
+  - Судя по всему дашборд достаточно старый, так как многие счетчики в дашборде не соответствуют своим названиям (например в pg_stat_bgwriter_*, в них добавлен префикс _total);
+- [Alertmanager | Grafana Labs](https://grafana.com/grafana/dashboards/9578-alertmanager/)
+  - Убраны ненужны графики;
+- [Prometheus Blackbox Exporter | Grafana Labs](https://grafana.com/grafana/dashboards/7587-prometheus-blackbox-exporter/)
+  - Добавлен график Response Code.
+- 4 Golden Signals
 
 Адрес с Prometheus: https://prometheus:9090/
 
 ## Ansible
 - - -
 
-Для node_exporter была сделана роль prometheus_node_exporter.
+Для node_exporter была сделана роль prometheus_node_exporter, который устанавливает и запускает node_exporter с авторизацией и коллекторами systemd, processes и filesystem.ignored-mount-points.
+
+Для postgresql_exporter была сделана роль prometheus_postgresql_exporter, который устанавливает и запускает postgresql_exporter с авторизацией и коллектором postmaster.

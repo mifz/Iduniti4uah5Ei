@@ -1,0 +1,11 @@
+[Unit]
+Description=Prometheus PostgreSQL Exporter Version {{ prometheus_postgresql_exporter_version }}
+After=network-online.target
+[Service]
+User={{ prometheus_postgresql_exporter_user }}
+Group={{ prometheus_postgresql_exporter_user }}
+Environment=DATA_SOURCE_NAME="postgresql://{{ patroni_superuser_username }}:{{ patroni_superuser_password }}@127.0.0.1:5432/?sslmode=disable"
+Type=simple
+ExecStart={{ prometheus_postgresql_exporter_bin }} --web.config.file={{ prometheus_postgresql_exporter_dir_conf }}/web-config.yml --auto-discover-databases --collector.postmaster 
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,85 @@
+---
+
+- name: Prometheus PostgreSQL Exporter {{ ':' }} Check for exist
+  ansible.builtin.stat:
+    path: "{{ prometheus_postgresql_exporter_bin }}"
+  register: r_prometheus_postgresql_exporter_exist
+
+- name: Prometheus PostgreSQL Exporter {{ ':' }} Ensure group exists
+  ansible.builtin.group:
+    name: "{{ prometheus_postgresql_exporter_group }}"
+    state: present
+
+- name: Prometheus PostgreSQL Exporter {{ ':' }} Create user
+  ansible.builtin.user:
+    name: "{{ prometheus_postgresql_exporter_user }}"
+    append: true
+    shell: /usr/sbin/nologin
+    group: "{{ prometheus_postgresql_exporter_group }}"
+    groups: ""
+    system: true
+    create_home: false
+
+- name: Prometheus PostgreSQL Exporter {{ ':' }} Create config dir
+  ansible.builtin.file:
+    path: "{{ prometheus_postgresql_exporter_dir_conf }}"
+    state: directory
+    owner: "{{ prometheus_postgresql_exporter_user }}"
+    group: "{{ prometheus_postgresql_exporter_group }}"    
+ 
+ 
+- name: Prometheus Node Exporter {{ ':' }} Check for version if exist
+  ansible.builtin.shell: "cat /etc/systemd/system/prometheus_postgresql_exporter.service | grep Version | sed s/'.*Version '//g"
+  when: r_prometheus_postgresql_exporter_exist.stat.exists == true
+  changed_when: false
+  register: r_prometheus_postgresql_exporter_version
+ 
+- block:
+ 
+    - name: Prometheus Node Exporter {{ ':' }} Download and unarchive
+      ansible.builtin.unarchive:
+        src: "https://github.com/prometheus-community/postgres_exporter/releases/download/v{{ prometheus_postgresql_exporter_version }}/postgres_exporter-{{ prometheus_postgresql_exporter_version }}.linux-amd64.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+        validate_certs: no
+ 
+    - name: Prometheus Node Exporter {{ ':' }} Move binary to bin path
+      ansible.builtin.copy:
+        src: "/tmp/postgres_exporter-{{ prometheus_postgresql_exporter_version }}.linux-amd64/postgres_exporter"
+        dest: "{{ prometheus_postgresql_exporter_bin }}"
+        owner: "{{ prometheus_postgresql_exporter_user }}"
+        group: "{{ prometheus_postgresql_exporter_group }}"
+        mode: 0755
+        remote_src: yes
+ 
+    - name: Prometheus Node Exporter {{ ':' }} Delete temp
+      ansible.builtin.file:
+        path: /tmp/postgres_exporter-{{ prometheus_postgresql_exporter_version }}.linux-amd64/
+        state: absent        
+  when: r_prometheus_postgresql_exporter_exist.stat.exists == false or not r_prometheus_postgresql_exporter_version.stdout == prometheus_postgresql_exporter_version
+ 
+- name: Prometheus Node Exporter {{ ':' }} Install web-config
+  ansible.builtin.copy:
+    src: web-config.yml
+    dest: "{{ prometheus_postgresql_exporter_dir_conf }}/web-config.yml"
+    owner: "{{ prometheus_postgresql_exporter_user }}"
+    group: "{{ prometheus_postgresql_exporter_group }}"
+    mode: 0755
+  notify: "Reload systemd daemon and restart prometheus_postgresql_exporter service"
+
+- name: Prometheus Node Exporter {{ ':' }} Install systemd service
+  ansible.builtin.template:
+    src: prometheus_postgresql_exporter.service.j2
+    dest: /etc/systemd/system/prometheus_postgresql_exporter.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: "Reload systemd daemon and restart prometheus_postgresql_exporter service"
+ 
+- meta: flush_handlers
+
+- name: Prometheus Node Exporter {{ ':' }} Enabled systemd service
+  ansible.builtin.systemd_service:
+    name: prometheus_postgresql_exporter
+    state: started
+    enabled: yes

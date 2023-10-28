@@ -5,6 +5,11 @@
     path: "{{ prometheus_node_exporter_bin }}"
   register: r_prometheus_node_exporter_exist
 
+- name: Prometheus Node Exporter {{ ':' }} Ensure group exists
+  ansible.builtin.group:
+    name: "{{ prometheus_node_exporter_group }}"
+    state: present
+
 - name: Prometheus Node Exporter {{ ':' }} Create user
   ansible.builtin.user:
     name: "{{ prometheus_node_exporter_user }}"

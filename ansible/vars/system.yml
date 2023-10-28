@@ -216,4 +216,11 @@ prometheus_node_exporter_group: "{{ prometheus_node_exporter_user }}"
 prometheus_node_exporter_dir_conf: /etc/prometheus_node_exporter
 prometheus_node_exporter_version: 1.6.1
 
+# Prometheus PostgreSQL Exporter
+prometheus_postgresql_exporter_bin: /usr/local/bin/postgresql_exporter
+prometheus_postgresql_exporter_user: postgresql-exporter
+prometheus_postgresql_exporter_group: "{{ prometheus_postgresql_exporter_user }}"
+prometheus_postgresql_exporter_dir_conf: /etc/prometheus_postgresql_exporter
+prometheus_postgresql_exporter_version: 0.14.0
+
 ...

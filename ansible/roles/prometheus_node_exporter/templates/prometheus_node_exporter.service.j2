@@ -5,6 +5,6 @@ After=network-online.target
 User={{ prometheus_node_exporter_user }}
 Group={{ prometheus_node_exporter_user }}
 Type=simple
-ExecStart={{ prometheus_node_exporter_bin }} --web.config.file={{ prometheus_node_exporter_dir_conf }}/web-config.yml --collector.systemd --collector.processes
+ExecStart={{ prometheus_node_exporter_bin }} --web.config.file={{ prometheus_node_exporter_dir_conf }}/web-config.yml --collector.systemd --collector.processes --collector.filesystem.ignored-mount-points=^/(sys|boot|proc|dev|run)($|/)
 [Install]
 WantedBy=multi-user.target
