@@ -115,3 +115,8 @@ Storage retention выставлен в 90 дней.
 Для node_exporter была сделана роль prometheus_node_exporter, который устанавливает и запускает node_exporter с авторизацией и коллекторами systemd, processes и filesystem.ignored-mount-points.
 
 Для postgresql_exporter была сделана роль prometheus_postgresql_exporter, который устанавливает и запускает postgresql_exporter с авторизацией и коллектором postmaster.
+
+### НТ
+- - -
+
+[[/Виртуальные машины]]

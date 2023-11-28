@@ -92,4 +92,5 @@ affinity: {}
 
 variables:
   ASPNETCORE_URLS: http://*:8080
+  DOTNET_ENVIRONMENT: Development
   CONNECTIONSTRINGS__PgConnection: server=77.105.185.170; port=5000; database=weather; user id=postgres; password=postgres-pass
