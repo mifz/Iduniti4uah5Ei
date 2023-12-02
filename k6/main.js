@@ -67,7 +67,8 @@ export let options = {
     // Сценарий 3, 4
     post_weather: {
       executor: 'per-vu-iterations',
-      vus: 100,
+      // vus: 100,
+      vus: 10,
       iterations: 50000,
       maxDuration: '30m',
       exec: 'postWeather',
