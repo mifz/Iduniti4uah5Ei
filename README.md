@@ -347,7 +347,7 @@ k6 установлен на сервере с Prometheus.
 - 13 931 значений погоды.
 
 
-Chaos Engineering
+## Chaos Engineering
 - - -
 
 Эксперименты будут проводиться на сценарии для K6 с constant-vus executor’ом. 100 пользователей обращаются к http://iduniti4uah5ei.local/Cities каждые 0.5 секунды в течении 10 минут.
